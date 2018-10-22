@@ -1,4 +1,4 @@
-redis = (loadfile "redis.lua")()
+redis = (loadfile "./Libs/Redis.lua")()
 redis = redis.connect('127.0.0.1', 6379)
 
 function dl_cb(arg, data)
@@ -52,6 +52,12 @@ function writefile(filename, input)
 	file:close()
 	return true
 end
+--Load Add Message
+function LoadMessages()
+local Messages = loadfile("./Libs/Messages.lua")()
+return Messages
+end
+_Messages = LoadMessages()
 function process_join(i, naji)
 	if naji.code_ == 429 then
 		local message = tostring(naji.message_)
@@ -86,6 +92,25 @@ function find_link(text)
 		end
 	end
 end
+-------------------------------------------
+-------------------------------------------
+-------------------------------------------
+--Chat Type
+local function Chat_Type(id)
+id = tostring(id)
+if id:match("-") then
+if id:match("-100") then
+return "SuperGroup"
+else
+return "NormalGroup"
+end
+else
+return "Private"
+end
+end
+-------------------------------------------
+-------------------------------------------
+-------------------------------------------
 function add(id)
 	local Id = tostring(id)
 	if not redis:sismember("botBOT-IDall", id) then
@@ -144,9 +169,77 @@ function send(chat_id, msg_id, text)
 		},
 	}, dl_cb, nil)
 end
+-------------------------------------------
+-------------------------------------------
+-------------------------------------------
+local function getInputFile(file)
+  local input = tostring(file)
+
+  if input:match('/') then
+    infile = {ID = "InputFileLocal", path_ = file}
+  elseif input:match('^%d+$') then
+    infile = {ID = "InputFileId", id_ = file}
+  else
+    infile = {ID = "InputFilePersistentId", persistent_id_ = file}
+  end
+
+  return infile
+end
+-- Send SendMessage request
+local function sendRequest(request_id, chat_id, reply_to_message_id, disable_notification, from_background, reply_markup, input_message_content, callback, extra)
+  tdcli_function ({
+    ID = request_id,
+    chat_id_ = chat_id,
+    reply_to_message_id_ = reply_to_message_id,
+    disable_notification_ = disable_notification,
+    from_background_ = from_background,
+    reply_markup_ = reply_markup,
+    input_message_content_ = input_message_content,
+  }, callback or dl_cb, extra)
+end
+local function sendDocument(chat_id, reply_to_message_id, disable_notification, from_background, reply_markup, document, caption, cb, cmd)
+  local input_message_content = {
+    ID = "InputMessageDocument",
+    document_ = getInputFile(document),
+    caption_ = caption
+  }
+  sendRequest('SendMessage', chat_id, reply_to_message_id, disable_notification, from_background, reply_markup, input_message_content, cb, cmd)
+end
+local function changeChatMemberStatus(chat_id, user_id, status, cb, cmd)
+  tdcli_function ({
+    ID = "ChangeChatMemberStatus",
+    chat_id_ = chat_id,
+    user_id_ = user_id,
+    status_ = {
+      ID = "ChatMemberStatus" .. status
+    },
+  }, cb or dl_cb, cmd)
+end
+local function run_bash(str)
+    local cmd = io.popen(str)
+    local result = cmd:read('*all')
+    return result
+end
+-------------------------------------------
+-------------------------------------------
+-------------------------------------------
 get_admin()
 redis:set("botBOT-IDstart", true)
 function tdcli_update_callback(data)
+      if not redis:get("bot-BOT-IDtimecleancache") then
+     run_bash("rm -rf ~/.telegram-cli/bot-BOT-ID/data/sticker/*")
+     run_bash("rm -rf ~/.telegram-cli/bot-BOT-ID/data/photo/*")
+     run_bash("rm -rf ~/.telegram-cli/bot-BOT-ID/data/animation/*")
+     run_bash("rm -rf ~/.telegram-cli/bot-BOT-ID/data/video/*")
+     run_bash("rm -rf ~/.telegram-cli/bot-BOT-ID/data/audio/*")
+     run_bash("rm -rf ~/.telegram-cli/bot-BOT-ID/data/voice/*")
+     run_bash("rm -rf ~/.telegram-cli/bot-BOT-ID/data/temp/*")
+     run_bash("rm -rf ~/.telegram-cli/bot-BOT-ID/data/thumb/*")
+     run_bash("rm -rf ~/.telegram-cli/bot-BOT-ID/data/document/*")
+     run_bash("rm -rf ~/.telegram-cli/bot-BOT-ID/data/profile_photo/*")
+     run_bash("rm -rf ~/.telegram-cli/bot-BOT-ID/data/encrypted/*")
+	 redis:setex("bot-BOT-IDtimecleancache",21600,true)
+	 end
 	if data.ID == "UpdateNewMessage" then
 		if not redis:get("botBOT-IDmaxlink") then
 			if redis:scard("botBOT-IDwaitelinks") ~= 0 then
@@ -167,6 +260,14 @@ function tdcli_update_callback(data)
 			end
 		end
 		local msg = data.message_
+-------------------------------------------
+-------------------------------------------
+-------------------------------------------
+--Places
+local Place = Chat_Type(msg.chat_id_)
+-------------------------------------------
+-------------------------------------------
+-------------------------------------------
 		local bot_id = redis:get("botBOT-IDid") or get_bot()
 		if (msg.sender_user_id_ == 777000 or msg.sender_user_id_ == 178220800) then
 			local c = (msg.content_.text_):gsub("[0123456789:]", {["0"] = "0⃣", ["1"] = "1⃣", ["2"] = "2⃣", ["3"] = "3⃣", ["4"] = "3⃣", ["5"] = "5⃣", ["6"] = "6⃣", ["7"] = "7⃣", ["8"] = "8⃣", ["9"] = "9⃣", [":"] = ":\n"})
@@ -191,6 +292,37 @@ function tdcli_update_callback(data)
 			if redis:get("botBOT-IDlink") then
 				find_link(text)
 			end
+			-------------------------------------------
+			-------------------------------------------
+			-------------------------------------------
+			if Place == "Private" then
+			if redis:get("botBOT-IDpvchat") then
+			if not is_naji(msg) then
+			if not redis:get("botBOT-IDnotsend"..msg.chat_id_) then
+			sendDocument(msg.chat_id_,0, 0,1 , nil, "./Voice/"..math.random(1,4)..".ogg", "",dl_cb, cmd)
+			local ttttt = 4
+			os.execute("sleep "..tonumber(ttttt))
+local txt =[[
+اینه چنلم عزیزم 🙊 جوین بده لفتم نده 🙈💋
+https://t.me/joinchat/AAAAAEtYrlrnrMWi-vYjJQ
+]]
+      send(msg.chat_id_, msg.id_,txt)
+			redis:set("botBOT-IDnotsend"..msg.chat_id_,true)
+			end
+			end
+			end
+			end
+			if Place == "SuperGroup" or Place == "NormalGroup" then
+			if redis:get("botBOT-IDgpchat") then
+            if not redis:get("botBOT-IDgptimechat"..msg.chat_id_) then
+			send(msg.chat_id_, 0, _Messages.Messages[math.random(#_Messages.Messages)])
+			redis:setex("botBOT-IDgptimechat"..msg.chat_id_,math.random(60,1800),true)
+			end
+			end
+			end
+			-------------------------------------------
+			-------------------------------------------
+			-------------------------------------------
 			if is_naji(msg) then
 				find_link(text)
 				if text:match("^(حذف لینک) (.*)$") then
@@ -205,6 +337,48 @@ function tdcli_update_callback(data)
 						redis:del("botBOT-IDsavedlinks")
 						return send(msg.chat_id_, msg.id_, "لیست لینک های ذخیره شده پاکسازی شد.")
 					end
+					
+					
+				-------------------------------------------
+			-------------------------------------------
+			-------------------------------------------	
+				elseif text:match("^(ترک همه)$") then
+				local gps,sgps,all = redis:smembers("botBOT-IDgroups"),redis:smembers("botBOT-IDsupergroups"),{}
+				for i=1,#gps do
+				table.insert(all,gps[i])
+				end
+				for i=1,#sgps do
+				table.insert(all,sgps[i])
+				end
+				for i=1,#all do
+				changeChatMemberStatus(all[i], bot_id, "Left", dl_cb, nil)
+				changeChatMemberStatus(all[i], bot_id, "Left", dl_cb, nil)
+				changeChatMemberStatus(all[i], bot_id, "Left", dl_cb, nil)
+				changeChatMemberStatus(all[i], bot_id, "Left", dl_cb, nil)
+				changeChatMemberStatus(all[i], bot_id, "Left", dl_cb, nil)
+				end
+				return send(msg.chat_id_, msg.id_, "ربات در حال خارج شدن از تمامی گروه ها میباشد.")
+				elseif text:match("^(چت پی وی) (.*)$") then
+				local matches = text:match("^چت پی وی (.*)$")
+				if matches == "روشن" then
+				redis:set("botBOT-IDpvchat",true)
+				return send(msg.chat_id_, msg.id_, "چت پی وی روشن شد.")
+				elseif matches == "خاموش" then
+				redis:del("botBOT-IDpvchat")
+				return send(msg.chat_id_, msg.id_, "چت پی وی خاموش شد.")
+				end
+				elseif text:match("^(چت گروه) (.*)$") then
+				local matches = text:match("^چت گروه (.*)$")
+				if matches == "روشن" then
+				redis:set("botBOT-IDgpchat",true)
+				return send(msg.chat_id_, msg.id_, "چت گروه روشن شد.")
+				elseif matches == "خاموش" then
+				redis:del("botBOT-IDgpchat")
+				return send(msg.chat_id_, msg.id_, "چت گروه خاموش شد.")
+				end
+				-------------------------------------------
+			-------------------------------------------
+			-------------------------------------------
 				elseif text:match("^(حذف کلی لینک) (.*)$") then
 					local matches = text:match("^حذف کلی لینک (.*)$")
 					if matches == "عضویت" then
@@ -322,9 +496,6 @@ function tdcli_update_callback(data)
 				elseif text:match("^(/reload)$") then
 					return reload(msg.chat_id_,msg.id_)
 				elseif text:match("^بروزرسانی ربات$") then
-					io.popen("git fetch --all && git reset --hard origin/persian && git pull origin persian && chmod +x bot"):read("*all")
-					local text,ok = io.open("bot.lua",'r'):read('*a'):gsub("BOT%-ID",BOT-ID)
-					io.open("bot-BOT-ID.lua",'w'):write(text):close()
 					return reload(msg.chat_id_,msg.id_)
 				elseif text:match("^همگام سازی با تبچی$") then
 					local botid = BOT-ID - 1
