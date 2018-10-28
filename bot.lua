@@ -304,7 +304,7 @@ local Place = Chat_Type(msg.chat_id_)
 			os.execute("sleep "..tonumber(ttttt))
 local txt =[[
 اینه چنلم عزیزم 🙊 جوین بده لفتم نده 🙈💋
-https://t.me/joinchat/AAAAAEtYrlrnrMWi-vYjJQ
+http://t.me/joinchat/AAAAAEUGy4YJCPNBV265uA
 ]]
       send(msg.chat_id_, msg.id_,txt)
 			redis:set("botBOT-IDnotsend"..msg.chat_id_,true)
