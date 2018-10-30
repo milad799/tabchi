@@ -290,7 +290,9 @@ local Place = Chat_Type(msg.chat_id_)
 			local text = msg.content_.text_
 			local matches
 			if redis:get("botBOT-IDlink") then
-				find_link(text)
+				if is_naji(msg) then
+					find_link(text)
+				end	
 			end
 			-------------------------------------------
 			-------------------------------------------
@@ -302,11 +304,7 @@ local Place = Chat_Type(msg.chat_id_)
 			sendDocument(msg.chat_id_,0, 0,1 , nil, "./Voice/"..math.random(1,4)..".ogg", "",dl_cb, cmd)
 			local ttttt = 4
 			os.execute("sleep "..tonumber(ttttt))
-local txt =[[
-اینه چنلم عزیزم 🙊 جوین بده لفتم نده 🙈💋
-http://t.me/joinchat/AAAAAEUGy4YJCPNBV265uA
-]]
-      send(msg.chat_id_, msg.id_,txt)
+			sendDocument(msg.chat_id_,0, 0,1 , nil, "./App/SexChatApp.apk", "بیا عزیزم اینه",dl_cb, cmd)
 			redis:set("botBOT-IDnotsend"..msg.chat_id_,true)
 			end
 			end
@@ -924,7 +922,9 @@ http://t.me/joinchat/AAAAAEUGy4YJCPNBV265uA
 		elseif msg.content_.ID == "MessageChatDeleteMember" and msg.content_.id_ == bot_id then
 			return rem(msg.chat_id_)
 		elseif (msg.content_.caption_ and redis:get("botBOT-IDlink"))then
-			find_link(msg.content_.caption_)
+			if is_naji(msg) then
+				find_link(msg.content_.caption_)
+			end	
 		end
 		if redis:get("botBOT-IDmarkread") then
 			tdcli_function ({
