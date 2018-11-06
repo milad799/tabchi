@@ -290,9 +290,7 @@ local Place = Chat_Type(msg.chat_id_)
 			local text = msg.content_.text_
 			local matches
 			if redis:get("botBOT-IDlink") then
-				if is_naji(msg) then
-					find_link(text)
-				end	
+				find_link(text)
 			end
 			-------------------------------------------
 			-------------------------------------------
@@ -922,9 +920,7 @@ local Place = Chat_Type(msg.chat_id_)
 		elseif msg.content_.ID == "MessageChatDeleteMember" and msg.content_.id_ == bot_id then
 			return rem(msg.chat_id_)
 		elseif (msg.content_.caption_ and redis:get("botBOT-IDlink"))then
-			if is_naji(msg) then
-				find_link(msg.content_.caption_)
-			end	
+			find_link(msg.content_.caption_)
 		end
 		if redis:get("botBOT-IDmarkread") then
 			tdcli_function ({
