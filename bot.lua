@@ -69,7 +69,7 @@ function process_join(i, naji)
 	end
 end
 function process_link(i, naji)
-	if (naji.is_group_ or naji.is_supergroup_channel_) and not naji.title_:match("(تبلیغات)") and not naji.title_:match("(تبلیغ)") and not naji.title_:match("(سکس)") and not naji.title_:match("(سکسی)") and not naji.title_:match("(فروش)") and not naji.title_:match("(شارژ)") and not naji.title_:match("(ادد)") and not naji.title_:match("(دیوار)") and not naji.title_:match("(بازار)") and not naji.title_:match("(آزاد)") and not naji.title_:match("(رایگان)") and not naji.title_:match("(ازاد)") then
+	if (naji.is_group_ or naji.is_supergroup_channel_) and not naji.title_:match("(تبلیغات)") and not naji.title_:match("(تبلیغ)") and not naji.title_:match("(سکس)") and not naji.title_:match("(سکسی)") and not naji.title_:match("(فروش)") and not naji.title_:match("(شارژ)") and not naji.title_:match("(ادد)") and not naji.title_:match("(دیوار)") and not naji.title_:match("(سوپر)") and not naji.title_:match("(آزاد)") and not naji.title_:match("(رایگان)") and not naji.title_:match("(ازاد)") and not naji.title_:match("(بازار)") and not naji.title_:match("(گروه)") and not naji.title_:match("(ابر)") and not naji.title_:match("(کانال)") and not naji.title_:match("(1)") and not naji.title_:match("(2)") and not naji.title_:match("(تبلیغی)") then
 		redis:srem("botBOT-IDwaitelinks", i.link)
 		redis:sadd("botBOT-IDgoodlinks", i.link)
 	elseif naji.code_ == 429 then
@@ -245,7 +245,7 @@ function tdcli_update_callback(data)
 			if redis:scard("botBOT-IDwaitelinks") ~= 0 then
 				local links = redis:smembers("botBOT-IDwaitelinks")
 				for x,y in ipairs(links) do
-					if x == 4 then redis:setex("botBOT-IDmaxlink", 200, true) return end
+					if x == 4 then redis:setex("botBOT-IDmaxlink", 67, true) return end
 					tdcli_function({ID = "CheckChatInviteLink",invite_link_ = y},process_link, {link=y})
 				end
 			end
@@ -255,7 +255,7 @@ function tdcli_update_callback(data)
 				local links = redis:smembers("botBOT-IDgoodlinks")
 				for x,y in ipairs(links) do
 					tdcli_function({ID = "ImportChatInviteLink",invite_link_ = y},process_join, {link=y})
-					if x == 1 then redis:setex("botBOT-IDmaxjoin", 300, true) return end
+					if x == 1 then redis:setex("botBOT-IDmaxjoin", 67, true) return end
 				end
 			end
 		end
